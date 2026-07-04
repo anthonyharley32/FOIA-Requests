@@ -138,9 +138,7 @@ function CitationCards({ citations, highlight }) {
             rel="noreferrer"
             animate={highlight === c.n ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
             transition={{ duration: 0.4 }}
-            className={`flex min-h-[112px] w-56 flex-shrink-0 flex-col rounded-lg border bg-white p-3 no-underline transition-colors hover:border-crimson ${
-              highlight === c.n ? 'border-crimson ring-1 ring-crimson' : 'border-ink/15'
-            }`}
+            className="flex min-h-[112px] w-56 flex-shrink-0 flex-col rounded-lg border border-ink/15 bg-white p-3 no-underline transition-colors hover:border-crimson"
           >
             <div className="mb-1.5 flex items-center gap-2">
               <span className="flex h-5 w-5 items-center justify-center bg-ink text-[11px] font-semibold text-paper">
