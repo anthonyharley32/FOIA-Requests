@@ -27,7 +27,7 @@ export default function Signup() {
       // and we can go straight into the app. Otherwise, show a "check your
       // inbox" message.
       if (data.session) {
-        navigate('/')
+        navigate('/dashboard')
       } else {
         setSuccess(true)
       }

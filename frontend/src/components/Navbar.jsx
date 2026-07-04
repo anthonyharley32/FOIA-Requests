@@ -13,7 +13,7 @@ export default function Navbar() {
   return (
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-        <Link to="/" className="flex items-baseline gap-2">
+        <Link to="/dashboard" className="flex items-baseline gap-2">
           <span className="text-lg font-semibold tracking-tight text-slate-900">
             Unredacted
           </span>
