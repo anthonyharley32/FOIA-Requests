@@ -11,29 +11,29 @@ export default function Navbar() {
   }
 
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="border-b border-ink/10 bg-paper">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-        <Link to="/dashboard" className="flex items-baseline gap-2">
-          <span className="text-lg font-semibold tracking-tight text-slate-900">
-            Unredacted
+        <Link to="/dashboard" className="flex items-baseline gap-3">
+          <span className="font-display text-xl tracking-tight text-ink">Unredacted</span>
+          <span className="hidden font-mono text-[10px] tracking-[0.2em] text-graphite sm:inline">
+            FOIA REQUEST STUDIO
           </span>
-          <span className="text-xs text-slate-400">FOIA Assistant</span>
         </Link>
 
         {session && (
-          <div className="flex items-center gap-4 text-sm text-slate-600">
+          <div className="flex items-center gap-4 text-sm text-graphite">
             {profile && (
-              <span className="hidden rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium uppercase tracking-wide text-slate-600 sm:inline">
+              <span className="hidden bg-ink/5 px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-graphite sm:inline">
                 {profile.role}
               </span>
             )}
-            <span className="hidden text-slate-500 sm:inline">{profile?.email}</span>
+            <span className="hidden text-graphite sm:inline">{profile?.email}</span>
             <button
               type="button"
               onClick={handleSignOut}
-              className="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 transition hover:bg-slate-50"
+              className="border border-ink/20 px-3 py-1.5 font-mono text-xs font-medium tracking-wider text-ink transition-colors hover:border-ink"
             >
-              Sign out
+              SIGN OUT
             </button>
           </div>
         )}

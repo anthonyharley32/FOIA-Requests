@@ -28,14 +28,18 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="mb-1 text-2xl font-semibold text-slate-900">Unredacted</h1>
-        <p className="mb-6 text-sm text-slate-500">Sign in to your account</p>
+    <div className="flex min-h-screen items-center justify-center bg-paper px-4">
+      <div className="w-full max-w-sm border border-ink/15 bg-white p-8 shadow-[8px_8px_0_0_rgba(12,12,14,0.06)]">
+        <Link to="/" className="font-display text-2xl tracking-tight text-ink">
+          Unredacted
+        </Link>
+        <p className="mt-1 mb-6 font-mono text-[10px] tracking-[0.2em] text-graphite">
+          SIGN IN TO YOUR ACCOUNT
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-ink">
               Email
             </label>
             <input
@@ -44,11 +48,11 @@ export default function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+              className="w-full border border-ink/25 bg-paper/50 px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
             />
           </div>
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="password" className="mb-1 block text-sm font-medium text-ink">
               Password
             </label>
             <input
@@ -57,24 +61,24 @@ export default function Login() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+              className="w-full border border-ink/25 bg-paper/50 px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-crimson">{error}</p>}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
+            className="w-full bg-ink px-3 py-2.5 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson disabled:opacity-50"
           >
-            {submitting ? 'Signing in...' : 'Sign in'}
+            {submitting ? 'SIGNING IN...' : 'SIGN IN'}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-graphite">
           Don't have an account?{' '}
-          <Link to="/signup" className="font-medium text-slate-900 underline">
+          <Link to="/signup" className="font-medium text-ink underline underline-offset-4">
             Sign up
           </Link>
         </p>

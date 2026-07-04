@@ -63,17 +63,17 @@ export default function AgentStepper({ active }) {
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left transition-colors hover:bg-slate-50"
+          className="flex w-full cursor-pointer items-center gap-2.5 border border-ink/15 bg-white px-3 py-2 text-left transition-colors hover:border-ink/40"
         >
           <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full">
             {allDone ? (
               <CheckCircle2 className="h-[18px] w-[18px] text-emerald-500" />
             ) : (
-              <Loader2 className="h-[18px] w-[18px] animate-spin text-slate-400" />
+              <Loader2 className="h-[18px] w-[18px] animate-spin text-graphite/60" />
             )}
           </div>
-          <span className="flex-1 text-xs font-medium text-slate-600">{headerLabel}</span>
-          <div className="text-slate-400">
+          <span className="flex-1 text-xs font-medium text-graphite">{headerLabel}</span>
+          <div className="text-graphite/60">
             {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </div>
         </button>
@@ -90,7 +90,7 @@ export default function AgentStepper({ active }) {
               }}
               className="overflow-hidden"
             >
-              <div className="relative ml-3 mt-2 pl-6 before:absolute before:bottom-1 before:left-[11.5px] before:top-1 before:w-[1.5px] before:bg-slate-100">
+              <div className="relative ml-3 mt-2 pl-6 before:absolute before:bottom-1 before:left-[11.5px] before:top-1 before:w-[1.5px] before:bg-ink/10">
                 <AnimatePresence initial={false}>
                   {visibleSteps.map((step, i) => {
                     const Icon = step.icon
@@ -108,15 +108,15 @@ export default function AgentStepper({ active }) {
                       >
                         <div className="relative flex items-center gap-2.5 py-1">
                           <div
-                            className={`absolute -left-[19.5px] flex h-4 w-4 items-center justify-center rounded-full border-2 border-white transition-colors duration-300 ${
-                              isDone ? 'bg-emerald-500' : 'bg-slate-400'
+                            className={`absolute -left-[19.5px] flex h-4 w-4 items-center justify-center rounded-full border-2 border-paper transition-colors duration-300 ${
+                              isDone ? 'bg-emerald-500' : 'bg-graphite/70'
                             }`}
                           >
                             <Icon className="h-2 w-2 text-white" />
                           </div>
-                          <span className="truncate text-xs text-slate-500">{step.label}</span>
+                          <span className="truncate text-xs text-graphite">{step.label}</span>
                           {!isDone && (
-                            <Loader2 className="ml-auto h-3 w-3 flex-shrink-0 animate-spin text-slate-400" />
+                            <Loader2 className="ml-auto h-3 w-3 flex-shrink-0 animate-spin text-graphite/60" />
                           )}
                         </div>
                       </motion.div>

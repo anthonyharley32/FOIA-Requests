@@ -1,8 +1,8 @@
 const STYLES = {
-  clarifying: 'bg-amber-100 text-amber-800',
-  submitted: 'bg-blue-100 text-blue-800',
-  under_review: 'bg-purple-100 text-purple-800',
-  fulfilled: 'bg-green-100 text-green-800',
+  clarifying: 'border-amber-300 bg-amber-50 text-amber-900',
+  submitted: 'border-ink/20 bg-ink/5 text-ink',
+  under_review: 'border-crimson/30 bg-crimson/10 text-crimson',
+  fulfilled: 'border-emerald-300 bg-emerald-50 text-emerald-800',
 }
 
 const LABELS = {
@@ -13,12 +13,12 @@ const LABELS = {
 }
 
 export default function StatusBadge({ status }) {
-  const style = STYLES[status] || 'bg-slate-100 text-slate-700'
+  const style = STYLES[status] || 'border-ink/20 bg-ink/5 text-graphite'
   const label = LABELS[status] || status
 
   return (
     <span
-      className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${style}`}
+      className={`inline-block border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.15em] ${style}`}
     >
       {label}
     </span>

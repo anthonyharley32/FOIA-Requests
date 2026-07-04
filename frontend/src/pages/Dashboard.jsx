@@ -38,10 +38,10 @@ export default function Dashboard() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">
+          <h1 className="font-display text-3xl tracking-tight text-ink">
             {isEmployee ? 'Review Queue' : 'Your Requests'}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-graphite">
             {isEmployee
               ? 'FOIA requests submitted by citizens, awaiting review.'
               : 'Track the status of the records requests you have filed.'}
@@ -50,19 +50,19 @@ export default function Dashboard() {
         {!isEmployee && profile && (
           <Link
             to="/requests/new"
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+            className="bg-ink px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson"
           >
-            + New Request
+            + NEW REQUEST
           </Link>
         )}
       </div>
 
-      {loading && <p className="text-sm text-slate-500">Loading...</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {loading && <p className="text-sm text-graphite">Loading...</p>}
+      {error && <p className="text-sm text-crimson">{error}</p>}
 
       {!loading && !error && requests.length === 0 && (
-        <div className="rounded-lg border border-dashed border-slate-300 py-12 text-center text-sm text-slate-500">
-          {isEmployee ? 'No requests in the queue yet.' : 'No requests yet.'}
+        <div className="border border-dashed border-ink/25 py-12 text-center font-mono text-xs tracking-wider text-graphite">
+          {isEmployee ? 'NO REQUESTS IN THE QUEUE YET.' : 'NO REQUESTS ON FILE YET.'}
         </div>
       )}
 
@@ -71,14 +71,14 @@ export default function Dashboard() {
           <li key={req.id}>
             <Link
               to={`/requests/${req.id}`}
-              className="block rounded-lg border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm"
+              className="block border border-ink/15 bg-white p-4 transition-colors hover:border-ink/40"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-slate-900">
+                  <p className="truncate text-sm font-medium text-ink">
                     {snippet(req.intent_text) || `Request #${req.id}`}
                   </p>
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 font-mono text-[11px] tracking-wide text-graphite/80">
                     {req.created_at ? new Date(req.created_at).toLocaleString() : ''}
                   </p>
                 </div>

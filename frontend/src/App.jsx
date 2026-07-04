@@ -11,7 +11,7 @@ import RequestDetail from './pages/RequestDetail'
 
 function Layout({ children }) {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-paper">
       <Navbar />
       {children}
     </div>

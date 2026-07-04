@@ -23,10 +23,10 @@ function MessageBubble({ message }) {
       className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className={`max-w-[85%] rounded-lg px-4 py-2 text-sm ${
+        className={`max-w-[85%] px-4 py-2 text-sm ${
           isUser
-            ? 'bg-slate-900 text-white'
-            : 'border border-slate-200 bg-white text-slate-800'
+            ? 'bg-ink text-paper'
+            : 'border border-ink/15 bg-white text-ink/80'
         }`}
       >
         {message.content}
@@ -159,7 +159,7 @@ export default function NewRequest() {
     <motion.div layout="position" layoutId="chat-input" transition={{ type: 'spring', duration: 0.5, bounce: 0.12 }} className="w-full max-w-2xl">
       <motion.div
         layout="position"
-        className="relative flex items-end overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-lg transition-all focus-within:border-slate-300 focus-within:ring-1 focus-within:ring-slate-300"
+        className="relative flex items-end overflow-hidden border border-ink/20 bg-white shadow-[6px_6px_0_0_rgba(12,12,14,0.06)] transition-all focus-within:border-ink"
       >
         <textarea
           ref={textareaRef}
@@ -172,7 +172,7 @@ export default function NewRequest() {
               : 'Type your answer...'
           }
           rows={1}
-          className="max-h-[200px] flex-1 resize-none overflow-y-auto bg-transparent py-4 pl-5 pr-2 text-gray-900 placeholder-gray-400 focus:outline-none"
+          className="max-h-[200px] flex-1 resize-none overflow-y-auto bg-transparent py-4 pl-5 pr-2 text-ink placeholder-graphite/50 focus:outline-none"
         />
         <AnimatePresence>
           {inputValue.trim() && (
@@ -185,7 +185,7 @@ export default function NewRequest() {
               exit={{ opacity: 0, scale: 0.8 }}
               whileTap={{ scale: 0.92 }}
               transition={springs.quick}
-              className="mb-1.5 mr-2 cursor-pointer rounded-full bg-slate-900 p-2.5 text-white transition-colors disabled:opacity-30"
+              className="mb-1.5 mr-2 cursor-pointer bg-ink p-2.5 text-paper transition-colors hover:bg-crimson disabled:opacity-30"
               aria-label="Send"
             >
               <ArrowUp className="h-4 w-4" />
@@ -197,14 +197,14 @@ export default function NewRequest() {
   )
 
   return (
-    <div className="relative flex h-[calc(100vh-57px)] flex-col bg-slate-50">
+    <div className="relative flex h-[calc(100vh-57px)] flex-col bg-paper">
       <div className="flex-1 overflow-y-auto">
         <div className={`mx-auto max-w-2xl px-4 pb-6 pt-8 ${isEmptyChat ? '' : 'pb-40'}`}>
           {isEmptyChat ? (
             <div className="flex flex-col items-center pt-[18vh] text-center">
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={springs.standard}>
-                <h1 className="mb-2 text-2xl font-semibold text-slate-900">New FOIA Request</h1>
-                <p className="mb-8 max-w-md text-sm text-slate-500">
+                <h1 className="mb-2 font-display text-3xl tracking-tight text-ink">New FOIA Request</h1>
+                <p className="mb-8 max-w-md text-sm text-graphite">
                   Describe what government records you're looking for in plain language. We'll
                   ask clarifying questions until it's specific enough to file.
                 </p>
@@ -212,7 +212,7 @@ export default function NewRequest() {
 
               {InputArea}
 
-              {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+              {error && <p className="mt-4 text-sm text-crimson">{error}</p>}
 
               <motion.div
                 className="mt-6 flex flex-wrap justify-center gap-2"
@@ -230,7 +230,7 @@ export default function NewRequest() {
                     transition={{ ...springs.standard, delay: 0.15 + index * 0.05 }}
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
-                    className="max-w-xs cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-left text-xs text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                    className="max-w-xs cursor-pointer border border-ink/15 bg-white px-4 py-2 text-left text-xs text-graphite transition-colors hover:border-ink/40"
                   >
                     {prompt}
                   </motion.button>
@@ -252,9 +252,9 @@ export default function NewRequest() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={springs.gentle}
-                  className="text-xs text-slate-500"
+                  className="font-mono text-[11px] tracking-wide text-graphite"
                 >
-                  <span className="font-medium text-slate-600">Likely agency:</span>{' '}
+                  <span className="font-medium text-ink">LIKELY AGENCY:</span>{' '}
                   {suggestedAgency}
                 </motion.p>
               )}
@@ -264,26 +264,26 @@ export default function NewRequest() {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={springs.standard}
-                  className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+                  className="border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
                 >
                   <p className="font-medium">Before filing — this info might already be public</p>
                   <p className="mt-1">{alreadyPublicHint}</p>
                 </motion.div>
               )}
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-sm text-crimson">{error}</p>}
 
               {ready && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={springs.standard}
-                  className="space-y-3 rounded-lg border border-slate-200 bg-white p-4"
+                  className="space-y-3 border border-ink/15 bg-white p-5"
                 >
-                  <h2 className="text-sm font-semibold text-slate-900">
-                    Review & refine your request
+                  <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.25em] text-graphite">
+                    Review & Refine Your Request
                   </h2>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-graphite">
                     This is the structured FOIA request text that will be submitted. Edit it
                     if needed before submitting.
                   </p>
@@ -291,15 +291,15 @@ export default function NewRequest() {
                     rows={10}
                     value={finalText}
                     onChange={(e) => setFinalText(e.target.value)}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                    className="w-full border border-ink/25 bg-paper/50 px-3 py-2 font-mono text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
                   />
                   <button
                     type="button"
                     onClick={handleSubmitRequest}
                     disabled={submitting}
-                    className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
+                    className="bg-ink px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson disabled:opacity-50"
                   >
-                    {submitting ? 'Submitting...' : 'Submit Request'}
+                    {submitting ? 'SUBMITTING...' : 'SUBMIT REQUEST'}
                   </button>
                 </motion.div>
               )}
@@ -309,7 +309,7 @@ export default function NewRequest() {
                   type="button"
                   onClick={handleSubmitRequest}
                   disabled={submitting}
-                  className="text-sm font-medium text-slate-400 underline hover:text-slate-600 disabled:opacity-50"
+                  className="text-sm font-medium text-graphite/70 underline underline-offset-4 hover:text-ink disabled:opacity-50"
                 >
                   Submit anyway
                 </button>

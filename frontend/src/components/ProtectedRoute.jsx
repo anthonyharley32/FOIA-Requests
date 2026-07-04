@@ -8,7 +8,7 @@ export default function ProtectedRoute({ children, role }) {
 
   if (loading || (session && profileLoading)) {
     return (
-      <div className="flex h-screen items-center justify-center text-slate-500">
+      <div className="flex h-screen items-center justify-center text-graphite">
         Loading...
       </div>
     )
