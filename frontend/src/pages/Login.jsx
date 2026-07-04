@@ -19,7 +19,7 @@ export default function Login() {
         password,
       })
       if (signInError) throw signInError
-      navigate('/')
+      navigate('/dashboard')
     } catch (err) {
       setError(err.message)
     } finally {
