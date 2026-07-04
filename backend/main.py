@@ -49,7 +49,7 @@ async def create_request(body: IntentCreate, user: dict = Depends(require_citize
     db.insert_message(request_id, "user", body.intent_text)
 
     ai_result = await get_ai_response(db.thread_for_ai(request_id))
-    db.insert_message(request_id, "ai", ai_result["message"])
+    db.insert_message(request_id, "ai", ai_result.get("answer") or ai_result["message"])
 
     if ai_result["ready"]:
         request_row = db.update_request(request_id, {"final_text": ai_result["final_text"]})
@@ -58,6 +58,9 @@ async def create_request(body: IntentCreate, user: dict = Depends(require_citize
         "request": request_row,
         "messages": db.fetch_messages(request_id),
         "ready": ai_result["ready"],
+        "mode": ai_result["mode"],
+        "answer": ai_result["answer"],
+        "citations": ai_result["citations"],
         "suggested_agency": ai_result["suggested_agency"],
         "already_public_hint": ai_result["already_public_hint"],
     }
@@ -74,7 +77,7 @@ async def reply_to_request(request_id: str, body: ReplyCreate, user: dict = Depe
     db.insert_message(request_id, "user", body.content)
 
     ai_result = await get_ai_response(db.thread_for_ai(request_id))
-    db.insert_message(request_id, "ai", ai_result["message"])
+    db.insert_message(request_id, "ai", ai_result.get("answer") or ai_result["message"])
 
     final_text = request_row.get("final_text")
     if ai_result["ready"]:
@@ -84,6 +87,9 @@ async def reply_to_request(request_id: str, body: ReplyCreate, user: dict = Depe
     return {
         "messages": db.fetch_messages(request_id),
         "ready": ai_result["ready"],
+        "mode": ai_result["mode"],
+        "answer": ai_result["answer"],
+        "citations": ai_result["citations"],
         "final_text": final_text,
         "suggested_agency": ai_result["suggested_agency"],
         "already_public_hint": ai_result["already_public_hint"],

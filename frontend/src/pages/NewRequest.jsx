@@ -12,7 +12,38 @@ const EXAMPLE_PROMPTS = [
   'Correspondence between the EPA and a local utility regarding water permit violations.',
 ]
 
-function MessageBubble({ message }) {
+// Renders assistant text, turning [n] markers into small clickable citation
+// badges that link to the matching source card / document URL.
+function CitationText({ text, citations }) {
+  if (!text) return null
+  const parts = text.split(/(\[\d+\])/g)
+  return (
+    <>
+      {parts.map((part, i) => {
+        const m = part.match(/^\[(\d+)\]$/)
+        if (m) {
+          const n = Number(m[1])
+          const cite = citations?.find((c) => c.n === n)
+          return (
+            <a
+              key={i}
+              href={cite?.url || '#'}
+              target="_blank"
+              rel="noreferrer"
+              title={cite?.title || ''}
+              className="mx-0.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-sm bg-crimson/10 px-1 align-super text-[10px] font-semibold text-crimson no-underline transition-colors hover:bg-crimson/25"
+            >
+              {n}
+            </a>
+          )
+        }
+        return <span key={i}>{part}</span>
+      })}
+    </>
+  )
+}
+
+function MessageBubble({ message, citations }) {
   const role = message.role || message.sender || 'assistant'
   const isUser = role === 'user' || role === 'citizen'
   return (
@@ -23,13 +54,52 @@ function MessageBubble({ message }) {
       className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className={`max-w-[85%] px-4 py-2 text-sm ${
+        className={`max-w-[85%] px-4 py-2 text-sm leading-relaxed ${
           isUser
             ? 'bg-ink text-paper'
             : 'border border-ink/15 bg-white text-ink/80'
         }`}
       >
-        {message.content}
+        {isUser ? message.content : <CitationText text={message.content} citations={citations} />}
+      </div>
+    </motion.div>
+  )
+}
+
+// Horizontally scrollable row of numbered source cards (Perplexity-style).
+function CitationCards({ citations }) {
+  if (!citations || citations.length === 0) return null
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={springs.standard}
+      className="space-y-2"
+    >
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-graphite">
+        Sources — public records
+      </p>
+      <div className="flex gap-3 overflow-x-auto pb-2">
+        {citations.map((c) => (
+          <a
+            key={c.n}
+            href={c.url}
+            target="_blank"
+            rel="noreferrer"
+            className="flex min-h-[112px] w-56 flex-shrink-0 flex-col border border-ink/15 bg-white p-3 no-underline transition-colors hover:border-crimson"
+          >
+            <div className="mb-1.5 flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center bg-ink text-[11px] font-semibold text-paper">
+                {c.n}
+              </span>
+              <span className="truncate font-mono text-[10px] uppercase tracking-wide text-graphite">
+                {c.source}
+              </span>
+            </div>
+            <p className="mb-1 line-clamp-2 text-xs font-medium text-ink">{c.title}</p>
+            <p className="line-clamp-3 text-[11px] text-graphite">{c.snippet}</p>
+          </a>
+        ))}
       </div>
     </motion.div>
   )
@@ -44,18 +114,20 @@ export default function NewRequest() {
   const [ready, setReady] = useState(false)
   const [finalText, setFinalText] = useState('')
 
+  const [mode, setMode] = useState('foia')
+  const [citations, setCitations] = useState([])
   const [suggestedAgency, setSuggestedAgency] = useState(null)
   const [alreadyPublicHint, setAlreadyPublicHint] = useState(null)
 
   const [inputValue, setInputValue] = useState('')
 
+  const [started, setStarted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
 
   const textareaRef = useRef(null)
 
-  const started = requestId !== null
   const isEmptyChat = !started
 
   useEffect(() => {
@@ -69,6 +141,8 @@ export default function NewRequest() {
     setMessages(data.messages || [])
     setReady(Boolean(data.ready))
     if (typeof data.final_text === 'string') setFinalText(data.final_text)
+    setMode(data.mode || 'foia')
+    setCitations(data.citations || [])
     setSuggestedAgency(data.suggested_agency ?? null)
     setAlreadyPublicHint(data.already_public_hint ?? null)
   }
@@ -77,6 +151,11 @@ export default function NewRequest() {
     const intent = text.trim()
     if (!intent) return
     setError(null)
+    // Optimistically enter the conversation view and show the user's message
+    // right away, so the thinking animation plays during the multi-second AI
+    // round-trip instead of the page sitting frozen on the empty state.
+    setStarted(true)
+    setMessages([{ id: 'local-user-0', sender: 'user', content: intent }])
     setLoading(true)
     try {
       const data = await fetchApi('/requests', {
@@ -96,6 +175,9 @@ export default function NewRequest() {
     const content = text.trim()
     if (!content) return
     setError(null)
+    // Optimistically append the user's reply so it (and the thinking stepper)
+    // appear instantly, before the AI round-trip returns the authoritative list.
+    setMessages((prev) => [...prev, { id: `local-user-${prev.length}`, sender: 'user', content }])
     setLoading(true)
     try {
       const data = await fetchApi(`/requests/${requestId}/reply`, {
@@ -241,11 +323,37 @@ export default function NewRequest() {
             <div className="space-y-4">
               <div className="space-y-3">
                 {messages.map((m, i) => (
-                  <MessageBubble key={m.id ?? i} message={m} />
+                  <MessageBubble key={m.id ?? i} message={m} citations={citations} />
                 ))}
               </div>
 
               <AgentStepper active={loading} />
+
+              {!loading && <CitationCards citations={citations} />}
+
+              {mode === 'answer' && !loading && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={springs.standard}
+                  className="flex flex-wrap items-center gap-3 border-t border-ink/10 pt-3"
+                >
+                  <span className="text-xs text-graphite">
+                    Need records that aren't in the public set?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleReply(
+                        "This is helpful, but I'd still like to file a FOIA request for records on this topic. Please help me draft it.",
+                      )
+                    }
+                    className="border border-ink/25 bg-white px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wider text-ink transition-colors hover:border-crimson hover:text-crimson"
+                  >
+                    File a FOIA request →
+                  </button>
+                </motion.div>
+              )}
 
               {suggestedAgency && (
                 <motion.p
