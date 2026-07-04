@@ -3,6 +3,15 @@ import { useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import StatusBadge from '../components/StatusBadge'
 
+/** Mono, tracked-out card heading in the dossier style. */
+function CardLabel({ children }) {
+  return (
+    <h2 className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.25em] text-graphite">
+      {children}
+    </h2>
+  )
+}
+
 export default function RequestDetail() {
   const { id } = useParams()
   const { fetchApi, role } = useAuth()
@@ -73,11 +82,11 @@ export default function RequestDetail() {
   }
 
   if (loading) {
-    return <div className="mx-auto max-w-2xl px-4 py-8 text-sm text-slate-500">Loading...</div>
+    return <div className="mx-auto max-w-2xl px-4 py-8 text-sm text-graphite">Loading...</div>
   }
 
   if (error) {
-    return <div className="mx-auto max-w-2xl px-4 py-8 text-sm text-red-600">{error}</div>
+    return <div className="mx-auto max-w-2xl px-4 py-8 text-sm text-crimson">{error}</div>
   }
 
   if (!request) return null
@@ -89,8 +98,10 @@ export default function RequestDetail() {
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Request #{request.id}</h1>
-          <p className="mt-1 text-xs text-slate-400">
+          <h1 className="font-display text-2xl tracking-tight text-ink">
+            Request #{request.id}
+          </h1>
+          <p className="mt-1 font-mono text-[11px] tracking-wide text-graphite/80">
             {request.created_at ? new Date(request.created_at).toLocaleString() : ''}
           </p>
         </div>
@@ -98,19 +109,19 @@ export default function RequestDetail() {
       </div>
 
       {request.final_text && (
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="mb-2 text-sm font-semibold text-slate-900">Request Text</h2>
-          <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700">
+        <div className="mb-6 border border-ink/15 bg-white p-5">
+          <CardLabel>Request Text</CardLabel>
+          <pre className="whitespace-pre-wrap font-mono text-sm text-ink/80">
             {request.final_text}
           </pre>
         </div>
       )}
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-900">Message Thread</h2>
+      <div className="mb-6 border border-ink/15 bg-white p-5">
+        <CardLabel>Message Thread</CardLabel>
         <div className="space-y-2">
           {messages.length === 0 && (
-            <p className="text-sm text-slate-400">No messages.</p>
+            <p className="text-sm text-graphite/70">No messages.</p>
           )}
           {messages.map((m, i) => {
             const r = m.role || m.sender || 'assistant'
@@ -118,8 +129,8 @@ export default function RequestDetail() {
             return (
               <div key={m.id ?? i} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-                    isUser ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800'
+                  className={`max-w-[85%] px-3 py-2 text-sm ${
+                    isUser ? 'bg-ink text-paper' : 'border border-ink/15 bg-paper text-ink/80'
                   }`}
                 >
                   {m.content}
@@ -132,19 +143,19 @@ export default function RequestDetail() {
 
       {/* Citizen view */}
       {!isEmployee && (
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-slate-900">Documents</h2>
+        <div className="border border-ink/15 bg-white p-5">
+          <CardLabel>Documents</CardLabel>
           {isFulfilled ? (
             documents.length > 0 ? (
               <ul className="space-y-2">
                 {documents.map((doc) => (
-                  <li key={doc.id} className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm">
-                    <span className="truncate text-slate-700">{doc.filename || doc.name || `Document #${doc.id}`}</span>
+                  <li key={doc.id} className="flex items-center justify-between border border-ink/15 px-3 py-2 text-sm">
+                    <span className="truncate text-ink/80">{doc.filename || doc.name || `Document #${doc.id}`}</span>
                     <a
                       href={doc.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="font-medium text-slate-900 underline"
+                      className="font-medium text-ink underline underline-offset-4"
                     >
                       Download
                     </a>
@@ -152,10 +163,10 @@ export default function RequestDetail() {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-500">Marked fulfilled, but no documents were attached.</p>
+              <p className="text-sm text-graphite">Marked fulfilled, but no documents were attached.</p>
             )
           ) : (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-graphite">
               Your request is currently <strong>{request.status}</strong>. Documents will appear
               here once it's fulfilled.
             </p>
@@ -166,16 +177,16 @@ export default function RequestDetail() {
       {/* Employee view */}
       {isEmployee && (
         <div className="space-y-4">
-          <div className="rounded-lg border border-slate-200 bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold text-slate-900">Existing Documents</h2>
+          <div className="border border-ink/15 bg-white p-5">
+            <CardLabel>Existing Documents</CardLabel>
             {documents.length === 0 ? (
-              <p className="text-sm text-slate-500">No documents attached yet.</p>
+              <p className="text-sm text-graphite">No documents attached yet.</p>
             ) : (
               <ul className="space-y-2">
                 {documents.map((doc) => (
-                  <li key={doc.id} className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm">
-                    <span className="truncate text-slate-700">{doc.filename || doc.name || `Document #${doc.id}`}</span>
-                    <a href={doc.url} target="_blank" rel="noreferrer" className="font-medium text-slate-900 underline">
+                  <li key={doc.id} className="flex items-center justify-between border border-ink/15 px-3 py-2 text-sm">
+                    <span className="truncate text-ink/80">{doc.filename || doc.name || `Document #${doc.id}`}</span>
+                    <a href={doc.url} target="_blank" rel="noreferrer" className="font-medium text-ink underline underline-offset-4">
                       View
                     </a>
                   </li>
@@ -185,40 +196,42 @@ export default function RequestDetail() {
           </div>
 
           {!isFulfilled && (
-            <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <h2 className="mb-3 text-sm font-semibold text-slate-900">Attach Responsive Document</h2>
+            <div className="border border-ink/15 bg-white p-5">
+              <CardLabel>Attach Responsive Document</CardLabel>
               <form onSubmit={handleUpload} className="flex flex-wrap items-center gap-3">
                 <input
                   ref={fileInputRef}
                   type="file"
                   onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  className="text-sm text-slate-600"
+                  className="text-sm text-graphite"
                 />
                 <button
                   type="submit"
                   disabled={!file || uploading}
-                  className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
+                  className="bg-ink px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson disabled:opacity-50"
                 >
-                  {uploading ? 'Uploading...' : 'Attach Document'}
+                  {uploading ? 'UPLOADING...' : 'ATTACH DOCUMENT'}
                 </button>
               </form>
             </div>
           )}
 
-          {actionError && <p className="text-sm text-red-600">{actionError}</p>}
+          {actionError && <p className="text-sm text-crimson">{actionError}</p>}
 
           {!isFulfilled && (
             <button
               type="button"
               onClick={handleFulfill}
               disabled={fulfilling}
-              className="rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-800 disabled:opacity-50"
+              className="bg-emerald-700 px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-white transition-colors hover:bg-emerald-800 disabled:opacity-50"
             >
-              {fulfilling ? 'Marking fulfilled...' : 'Mark Fulfilled'}
+              {fulfilling ? 'MARKING FULFILLED...' : 'MARK FULFILLED'}
             </button>
           )}
           {isFulfilled && (
-            <p className="text-sm font-medium text-green-700">This request has been fulfilled.</p>
+            <p className="font-mono text-xs font-medium tracking-wider text-emerald-700">
+              THIS REQUEST HAS BEEN FULFILLED.
+            </p>
           )}
         </div>
       )}

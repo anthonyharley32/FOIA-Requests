@@ -10,35 +10,93 @@ import { useAuth } from '../context/AuthContext'
 const EASE = [0.76, 0, 0.24, 1]
 
 /**
- * Text that starts as a solid redaction bar, then the bar wipes away
- * to reveal the words beneath. The signature motif of the page.
+ * SVG turbulence filter that roughens the redaction strokes so they
+ * read as hand-swiped marker ink rather than printed rectangles.
+ * Rendered once, invisibly, at the page root.
  */
-function Unredact({ children, delay = 0, bar = 'bg-ink', inView = false, className = '' }) {
-  const barMotion = {
-    initial: { scaleX: 1 },
-    transition: { delay: delay + 0.1, duration: 0.7, ease: EASE },
-    style: { transformOrigin: '100% 50%' },
+function MarkerFilter() {
+  return (
+    <svg aria-hidden className="absolute h-0 w-0">
+      <filter id="marker-rough">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.02 0.35"
+          numOctaves="3"
+          seed="7"
+          result="noise"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="noise"
+          scale="4"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
+    </svg>
+  )
+}
+
+/** Streaky, near-opaque ink — faint alpha variation like overlapping marker passes. */
+const MARKER_TONES = {
+  ink: 'linear-gradient(100deg, rgba(12,12,14,0.97), rgba(12,12,14,1) 16%, rgba(12,12,14,0.96) 38%, rgba(12,12,14,1) 57%, rgba(12,12,14,0.97) 78%, rgba(12,12,14,0.99))',
+  crimson:
+    'linear-gradient(100deg, rgba(196,30,58,0.97), rgba(196,30,58,1) 16%, rgba(196,30,58,0.96) 38%, rgba(196,30,58,1) 57%, rgba(196,30,58,0.97) 78%, rgba(196,30,58,0.99))',
+}
+
+/**
+ * Feathered leading edge for the sliding ink: its left side fades from
+ * transparent to opaque, so as the ink slides right the text is revealed
+ * through a soft fading edge instead of a hard straight cut.
+ */
+const FEATHER_MASK = 'linear-gradient(to right, transparent 0%, black 22%)'
+
+/**
+ * Text that starts hidden under a dark marker-highlight stroke, then the
+ * stroke wipes away to reveal the words beneath. The signature motif.
+ */
+function Unredact({ children, delay = 0, tone = 'ink', inView = false, className = '' }) {
+  // The ink is 130% of the stroke's width with 30% hanging off the left,
+  // so its feathered left edge starts hidden. Sliding it right (a plain
+  // transform, cheap and reliable) sweeps the soft edge across the text
+  // while the container clips whatever leaves the stroke's rounded shape.
+  const inkMotion = {
+    initial: { x: '0%' },
+    transition: { delay: delay + 0.1, duration: 0.8, ease: EASE },
+    style: {
+      left: '-30%',
+      width: '130%',
+      backgroundImage: MARKER_TONES[tone] ?? MARKER_TONES.ink,
+      WebkitMaskImage: FEATHER_MASK,
+      maskImage: FEATHER_MASK,
+    },
   }
-  const anim = { scaleX: 0 }
+  const anim = { x: '103%' }
+  const inkClass = 'absolute inset-y-0'
   return (
     <span className={`relative inline-block whitespace-nowrap ${className}`}>
       {children}
-      {inView ? (
-        <motion.span
-          aria-hidden
-          className={`absolute -inset-x-1 inset-y-0 ${bar}`}
-          whileInView={anim}
-          viewport={{ once: true, margin: '-80px' }}
-          {...barMotion}
-        />
-      ) : (
-        <motion.span
-          aria-hidden
-          className={`absolute -inset-x-1 inset-y-0 ${bar}`}
-          animate={anim}
-          {...barMotion}
-        />
-      )}
+      <span
+        aria-hidden
+        className="absolute -inset-x-[0.18em] -inset-y-[0.04em] z-10 overflow-hidden"
+        style={{
+          // Irregular rounded caps, like the start/end of a marker swipe
+          borderRadius: '0.5em 0.4em 0.45em 0.55em / 55% 45% 60% 50%',
+          filter: 'url(#marker-rough)',
+          rotate: '-0.6deg',
+        }}
+      >
+        {inView ? (
+          <motion.span
+            className={inkClass}
+            whileInView={anim}
+            viewport={{ once: true, margin: '-80px' }}
+            {...inkMotion}
+          />
+        ) : (
+          <motion.span className={inkClass} animate={anim} {...inkMotion} />
+        )}
+      </span>
     </span>
   )
 }
@@ -159,10 +217,10 @@ function DocumentCard() {
         <div className="space-y-3.5 text-[13px] leading-relaxed text-ink/80">
           <p>Pursuant to the Freedom of Information Act, I request copies of:</p>
           <p>
-            (1) All <Unredact delay={1.2} bar="bg-ink/90">final policy memoranda</Unredact> issued
+            (1) All <Unredact delay={1.2}>final policy memoranda</Unredact> issued
             by the Office of UAS Integration between{' '}
-            <Unredact delay={1.45} bar="bg-ink/90">Jan 1, 2024 and Dec 31, 2025</Unredact>{' '}
-            concerning waivers under <Unredact delay={1.7} bar="bg-ink/90">14 C.F.R. Part 107</Unredact>;
+            <Unredact delay={1.45}>Jan 1, 2024 and Dec 31, 2025</Unredact>{' '}
+            concerning waivers under <Unredact delay={1.7}>14 C.F.R. Part 107</Unredact>;
           </p>
           <p className="text-ink/50">
             I request a fee waiver as disclosure is in the public interest…
@@ -272,7 +330,7 @@ function Stats() {
             <Rise key={stat.value} delay={i * 0.1}>
               <div className="border-t-2 border-ink pt-4">
                 <p className="font-display text-4xl text-ink lg:text-5xl">
-                  <Unredact inView delay={0.2 + i * 0.15} bar="bg-crimson">
+                  <Unredact inView delay={0.2 + i * 0.15} tone="crimson">
                     {stat.value}
                   </Unredact>
                 </p>
@@ -420,7 +478,7 @@ function FinalCta({ session }) {
           </p>
           <h2 className="mx-auto mt-6 max-w-3xl font-display text-5xl leading-[1.08] text-paper sm:text-6xl">
             The file is already yours.{' '}
-            <Unredact inView delay={0.5} bar="bg-crimson" className="italic">
+            <Unredact inView delay={0.5} tone="crimson" className="italic">
               Ask well.
             </Unredact>
           </h2>
@@ -463,6 +521,7 @@ export default function Landing() {
   const { session } = useAuth()
   return (
     <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+      <MarkerFilter />
       <ClassificationBar />
       <Header session={session} />
       <main>
