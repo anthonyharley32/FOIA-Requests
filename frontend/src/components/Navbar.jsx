@@ -25,13 +25,13 @@ export default function Navbar() {
 
   return (
     <header className="border-b border-ink/10 bg-paper">
-      <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-        <Link to="/dashboard" className="flex items-baseline gap-3">
+      <div className="relative mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+        <Link to="/dashboard" className="flex items-baseline">
           <span className="font-display text-3xl tracking-tight text-ink">Unredacted</span>
-          <span className="hidden font-mono text-[10px] tracking-[0.2em] text-graphite sm:inline">
-            FOIA REQUEST STUDIO
-          </span>
         </Link>
+        <span className="pointer-events-none absolute left-1/2 hidden -translate-x-1/2 font-mono text-[10px] tracking-[0.2em] text-graphite sm:inline">
+          FOIA REQUEST STUDIO
+        </span>
 
         {session && (
           <div className="relative" ref={menuRef}>

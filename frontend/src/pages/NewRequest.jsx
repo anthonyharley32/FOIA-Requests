@@ -7,10 +7,22 @@ import AgentStepper from '../components/AgentStepper'
 import { springs } from '../lib/animations'
 
 const EXAMPLE_PROMPTS = [
+  'Did Lee Harvey Oswald act alone in the assassination of President Kennedy?',
   'Emails from the CHIPS Program Office about delays on the Intel Ohio fab project during 2025.',
   'OSHA inspection reports for a manufacturing plant in Austin, TX filed in the last two years.',
-  'Correspondence between the EPA and a local utility regarding water permit violations.',
 ]
+
+// Persist the in-progress conversation for the tab so navigating away (to the
+// dashboard, a request, etc.) and back doesn't wipe it. Cleared on submit or
+// "Start over". sessionStorage = per-tab, auto-clears when the tab closes.
+const STORAGE_KEY = 'unredacted:newrequest'
+function loadSaved() {
+  try {
+    return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null')
+  } catch {
+    return null
+  }
+}
 
 // Renders assistant text, turning [n] markers into small clickable citation
 // badges that link to the matching source card / document URL.
@@ -56,7 +68,7 @@ function MessageBubble({ message, citations }) {
       <div
         className={`max-w-[85%] px-4 py-2 text-sm leading-relaxed ${
           isUser
-            ? 'bg-ink text-paper'
+            ? 'border border-ink/15 bg-ink/[0.06] text-ink'
             : 'border border-ink/15 bg-white text-ink/80'
         }`}
       >
@@ -109,19 +121,20 @@ export default function NewRequest() {
   const { fetchApi } = useAuth()
   const navigate = useNavigate()
 
-  const [requestId, setRequestId] = useState(null)
-  const [messages, setMessages] = useState([])
-  const [ready, setReady] = useState(false)
-  const [finalText, setFinalText] = useState('')
+  const [savedOnce] = useState(loadSaved)
 
-  const [mode, setMode] = useState('foia')
-  const [citations, setCitations] = useState([])
-  const [suggestedAgency, setSuggestedAgency] = useState(null)
-  const [alreadyPublicHint, setAlreadyPublicHint] = useState(null)
+  const [requestId, setRequestId] = useState(savedOnce?.requestId ?? null)
+  const [messages, setMessages] = useState(savedOnce?.messages ?? [])
+  const [ready, setReady] = useState(savedOnce?.ready ?? false)
+  const [finalText, setFinalText] = useState(savedOnce?.finalText ?? '')
+
+  const [mode, setMode] = useState(savedOnce?.mode ?? 'foia')
+  const [citations, setCitations] = useState(savedOnce?.citations ?? [])
+  const [suggestedAgency, setSuggestedAgency] = useState(savedOnce?.suggestedAgency ?? null)
 
   const [inputValue, setInputValue] = useState('')
 
-  const [started, setStarted] = useState(false)
+  const [started, setStarted] = useState(savedOnce?.started ?? false)
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -138,6 +151,35 @@ export default function NewRequest() {
     }
   }, [inputValue])
 
+  // Persist the conversation so route changes (and returning to this page)
+  // don't lose it.
+  useEffect(() => {
+    if (!started) {
+      sessionStorage.removeItem(STORAGE_KEY)
+      return
+    }
+    const snapshot = { requestId, messages, ready, finalText, mode, citations, suggestedAgency, started }
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))
+    } catch {
+      /* ignore quota / private-mode errors */
+    }
+  }, [requestId, messages, ready, finalText, mode, citations, suggestedAgency, started])
+
+  const handleReset = () => {
+    sessionStorage.removeItem(STORAGE_KEY)
+    setRequestId(null)
+    setMessages([])
+    setReady(false)
+    setFinalText('')
+    setMode('foia')
+    setCitations([])
+    setSuggestedAgency(null)
+    setStarted(false)
+    setInputValue('')
+    setError(null)
+  }
+
   const applyTurnResult = (data) => {
     setMessages(data.messages || [])
     setReady(Boolean(data.ready))
@@ -145,7 +187,6 @@ export default function NewRequest() {
     setMode(data.mode || 'foia')
     setCitations(data.citations || [])
     setSuggestedAgency(data.suggested_agency ?? null)
-    setAlreadyPublicHint(data.already_public_hint ?? null)
   }
 
   const handleStart = async (text) => {
@@ -239,6 +280,7 @@ export default function NewRequest() {
         method: 'POST',
         body: JSON.stringify({ final_text: finalText }),
       })
+      sessionStorage.removeItem(STORAGE_KEY)
       navigate(`/requests/${requestId}`)
     } catch (err) {
       setError(err.message)
@@ -296,7 +338,7 @@ export default function NewRequest() {
           {isEmptyChat ? (
             <div className="flex flex-col items-center pt-[18vh] text-center">
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={springs.standard}>
-                <h1 className="mb-2 font-display text-3xl tracking-tight text-ink">New FOIA Request</h1>
+                <h1 className="mb-2 font-display text-4xl tracking-tight text-ink sm:text-5xl">New FOIA Request</h1>
                 <p className="mb-8 max-w-md text-sm text-graphite">
                   Describe what government records you're looking for in plain language. We'll
                   ask clarifying questions until it's specific enough to file.
@@ -332,6 +374,15 @@ export default function NewRequest() {
             </div>
           ) : (
             <div className="space-y-4">
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="font-mono text-[11px] uppercase tracking-wider text-graphite transition-colors hover:text-crimson"
+                >
+                  ↺ Start over
+                </button>
+              </div>
               <div className="space-y-3">
                 {messages.map((m, i) => (
                   <MessageBubble key={m.id ?? i} message={m} citations={citations} />
@@ -376,18 +427,6 @@ export default function NewRequest() {
                   <span className="font-medium text-ink">LIKELY AGENCY:</span>{' '}
                   {suggestedAgency}
                 </motion.p>
-              )}
-
-              {alreadyPublicHint && (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={springs.standard}
-                  className="border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
-                >
-                  <p className="font-medium">Before filing — this info might already be public</p>
-                  <p className="mt-1">{alreadyPublicHint}</p>
-                </motion.div>
               )}
 
               {error && <p className="text-sm text-crimson">{error}</p>}
@@ -437,7 +476,7 @@ export default function NewRequest() {
                       {copied ? 'COPIED ✓' : 'COPY REQUEST'}
                     </button>
                     <a
-                      href="https://www.foia.gov/"
+                      href="https://www.foia.gov/agency-search.html"
                       target="_blank"
                       rel="noreferrer"
                       className="border border-ink/25 px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-ink no-underline transition-colors hover:border-crimson hover:text-crimson"
@@ -456,16 +495,6 @@ export default function NewRequest() {
                 </motion.div>
               )}
 
-              {!ready && (
-                <button
-                  type="button"
-                  onClick={handleSubmitRequest}
-                  disabled={submitting}
-                  className="text-sm font-medium text-graphite/70 underline underline-offset-4 hover:text-ink disabled:opacity-50"
-                >
-                  Submit anyway
-                </button>
-              )}
             </div>
           )}
         </div>

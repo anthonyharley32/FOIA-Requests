@@ -135,7 +135,7 @@ export default function RequestDetail() {
                 {copied ? 'COPIED ✓' : 'COPY REQUEST'}
               </button>
               <a
-                href="https://www.foia.gov/"
+                href="https://www.foia.gov/agency-search.html"
                 target="_blank"
                 rel="noreferrer"
                 className="border border-ink/25 px-4 py-2 font-mono text-xs font-medium tracking-wider text-ink no-underline transition-colors hover:border-crimson hover:text-crimson"
@@ -160,7 +160,7 @@ export default function RequestDetail() {
               <div key={m.id ?? i} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-[85%] px-3 py-2 text-sm ${
-                    isUser ? 'bg-ink text-paper' : 'border border-ink/15 bg-paper text-ink/80'
+                    isUser ? 'border border-ink/15 bg-ink/[0.06] text-ink' : 'border border-ink/15 bg-paper text-ink/80'
                   }`}
                 >
                   {m.content}
