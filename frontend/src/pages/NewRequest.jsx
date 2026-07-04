@@ -58,7 +58,7 @@ const FORMATS = ['Electronic / PDF', 'Paper copies']
 
 // Renders assistant text, turning [n] markers into small clickable citation
 // badges that link to the matching source card / document URL.
-function CitationText({ text, citations }) {
+function CitationText({ text, citations, onHover }) {
   if (!text) return null
   const parts = text.split(/(\[\d+\])/g)
   return (
@@ -75,6 +75,8 @@ function CitationText({ text, citations }) {
               target="_blank"
               rel="noreferrer"
               title={cite?.title || ''}
+              onMouseEnter={() => onHover?.(n)}
+              onMouseLeave={() => onHover?.(null)}
               className="mx-0.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-sm bg-crimson/10 px-1 align-super text-[10px] font-semibold text-crimson no-underline transition-colors hover:bg-crimson/25"
             >
               {n}
@@ -87,7 +89,7 @@ function CitationText({ text, citations }) {
   )
 }
 
-function MessageBubble({ message, citations }) {
+function MessageBubble({ message, citations, onCiteHover }) {
   const role = message.role || message.sender || 'assistant'
   const isUser = role === 'user' || role === 'citizen'
   return (
@@ -104,14 +106,18 @@ function MessageBubble({ message, citations }) {
             : 'border border-ink/15 bg-white text-ink/80'
         }`}
       >
-        {isUser ? message.content : <CitationText text={message.content} citations={citations} />}
+        {isUser ? (
+          message.content
+        ) : (
+          <CitationText text={message.content} citations={citations} onHover={onCiteHover} />
+        )}
       </div>
     </motion.div>
   )
 }
 
 // Horizontally scrollable row of numbered source cards (Perplexity-style).
-function CitationCards({ citations }) {
+function CitationCards({ citations, highlight }) {
   if (!citations || citations.length === 0) return null
   return (
     <motion.div
@@ -125,12 +131,16 @@ function CitationCards({ citations }) {
       </p>
       <div className="flex gap-3 overflow-x-auto pb-2">
         {citations.map((c) => (
-          <a
+          <motion.a
             key={c.n}
             href={c.url}
             target="_blank"
             rel="noreferrer"
-            className="flex min-h-[112px] w-56 flex-shrink-0 flex-col rounded-lg border border-ink/15 bg-white p-3 no-underline transition-colors hover:border-crimson"
+            animate={highlight === c.n ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
+            transition={{ duration: 0.4 }}
+            className={`flex min-h-[112px] w-56 flex-shrink-0 flex-col rounded-lg border bg-white p-3 no-underline transition-colors hover:border-crimson ${
+              highlight === c.n ? 'border-crimson ring-1 ring-crimson' : 'border-ink/15'
+            }`}
           >
             <div className="mb-1.5 flex items-center gap-2">
               <span className="flex h-5 w-5 items-center justify-center bg-ink text-[11px] font-semibold text-paper">
@@ -142,7 +152,7 @@ function CitationCards({ citations }) {
             </div>
             <p className="mb-1 line-clamp-2 text-xs font-medium text-ink">{c.title}</p>
             <p className="line-clamp-3 text-[11px] text-graphite">{c.snippet}</p>
-          </a>
+          </motion.a>
         ))}
       </div>
     </motion.div>
@@ -171,6 +181,7 @@ export default function NewRequest() {
 
   const [mode, setMode] = useState(savedOnce?.mode ?? 'foia')
   const [citations, setCitations] = useState(savedOnce?.citations ?? [])
+  const [hoveredCite, setHoveredCite] = useState(null)
   const [suggestedAgency, setSuggestedAgency] = useState(savedOnce?.suggestedAgency ?? null)
 
   const [inputValue, setInputValue] = useState('')
@@ -449,13 +460,18 @@ export default function NewRequest() {
               </div>
               <div className="space-y-3">
                 {messages.map((m, i) => (
-                  <MessageBubble key={m.id ?? i} message={m} citations={citations} />
+                  <MessageBubble
+                    key={m.id ?? i}
+                    message={m}
+                    citations={citations}
+                    onCiteHover={setHoveredCite}
+                  />
                 ))}
               </div>
 
               <AgentStepper active={loading} />
 
-              {!loading && <CitationCards citations={citations} />}
+              {!loading && <CitationCards citations={citations} highlight={hoveredCite} />}
 
               {mode === 'answer' && !loading && (
                 <motion.div
