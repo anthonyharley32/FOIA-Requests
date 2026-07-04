@@ -114,10 +114,15 @@ export default function RequestDetail() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl tracking-tight text-ink">
-            Request #{request.id}
+            {request.intent_text
+              ? request.intent_text.length > 80
+                ? `${request.intent_text.slice(0, 80)}…`
+                : request.intent_text
+              : 'FOIA Request'}
           </h1>
           <p className="mt-1 font-mono text-[11px] tracking-wide text-graphite/80">
-            {request.created_at ? new Date(request.created_at).toLocaleString() : ''}
+            #{request.id.slice(0, 8)}
+            {request.created_at ? ` · ${new Date(request.created_at).toLocaleString()}` : ''}
           </p>
         </div>
         <StatusBadge status={request.status} />
