@@ -66,7 +66,7 @@ function MessageBubble({ message, citations }) {
       className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className={`max-w-[85%] px-4 py-2 text-sm leading-relaxed ${
+        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
           isUser
             ? 'border border-ink/15 bg-ink/[0.06] text-ink'
             : 'border border-ink/15 bg-white text-ink/80'
@@ -98,7 +98,7 @@ function CitationCards({ citations }) {
             href={c.url}
             target="_blank"
             rel="noreferrer"
-            className="flex min-h-[112px] w-56 flex-shrink-0 flex-col border border-ink/15 bg-white p-3 no-underline transition-colors hover:border-crimson"
+            className="flex min-h-[112px] w-56 flex-shrink-0 flex-col rounded-lg border border-ink/15 bg-white p-3 no-underline transition-colors hover:border-crimson"
           >
             <div className="mb-1.5 flex items-center gap-2">
               <span className="flex h-5 w-5 items-center justify-center bg-ink text-[11px] font-semibold text-paper">
@@ -294,7 +294,7 @@ export default function NewRequest() {
     <motion.div layout="position" layoutId="chat-input" transition={{ type: 'spring', duration: 0.5, bounce: 0.12 }} className="w-full max-w-2xl">
       <motion.div
         layout="position"
-        className="relative flex items-end overflow-hidden border border-ink/20 bg-white shadow-[6px_6px_0_0_rgba(12,12,14,0.06)] transition-all focus-within:border-ink"
+        className="relative flex items-end overflow-hidden rounded-3xl border border-ink/20 bg-white shadow-[6px_6px_0_0_rgba(12,12,14,0.06)] transition-all focus-within:border-ink"
       >
         <textarea
           ref={textareaRef}
@@ -320,7 +320,7 @@ export default function NewRequest() {
               exit={{ opacity: 0, scale: 0.8 }}
               whileTap={{ scale: 0.92 }}
               transition={springs.quick}
-              className="mb-1.5 mr-2 cursor-pointer bg-ink p-2.5 text-paper transition-colors hover:bg-crimson disabled:opacity-30"
+              className="mb-1.5 mr-2 cursor-pointer rounded-full bg-ink p-2.5 text-paper transition-colors hover:bg-crimson disabled:opacity-30"
               aria-label="Send"
             >
               <ArrowUp className="h-4 w-4" />
@@ -365,7 +365,7 @@ export default function NewRequest() {
                     transition={{ ...springs.standard, delay: 0.15 + index * 0.05 }}
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
-                    className="max-w-xs cursor-pointer border border-ink/15 bg-white px-4 py-2 text-left text-xs text-graphite transition-colors hover:border-ink/40"
+                    className="max-w-xs cursor-pointer rounded-2xl border border-ink/15 bg-white px-4 py-2 text-left text-xs text-graphite transition-colors hover:border-ink/40"
                   >
                     {prompt}
                   </motion.button>
@@ -410,7 +410,7 @@ export default function NewRequest() {
                         "This is helpful, but I'd still like to file a FOIA request for records on this topic. Please help me draft it.",
                       )
                     }
-                    className="border border-ink/25 bg-white px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wider text-ink transition-colors hover:border-crimson hover:text-crimson"
+                    className="rounded-md border border-ink/25 bg-white px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wider text-ink transition-colors hover:border-crimson hover:text-crimson"
                   >
                     File a FOIA request →
                   </button>
@@ -436,7 +436,7 @@ export default function NewRequest() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={springs.standard}
-                  className="space-y-4 border border-ink/15 bg-white p-5"
+                  className="space-y-4 rounded-lg border border-ink/15 bg-white p-5"
                 >
                   <div>
                     <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.25em] text-graphite">
@@ -452,11 +452,11 @@ export default function NewRequest() {
                     rows={12}
                     value={finalText}
                     onChange={(e) => setFinalText(e.target.value)}
-                    className="w-full border border-ink/25 bg-paper/50 px-3 py-2 font-mono text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
+                    className="w-full rounded-md border border-ink/25 bg-paper/50 px-3 py-2 font-mono text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
                   />
 
                   {suggestedAgency && (
-                    <div className="border border-ink/15 bg-paper/60 px-4 py-3">
+                    <div className="rounded-md border border-ink/15 bg-paper/60 px-4 py-3">
                       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-graphite">
                         Where to file
                       </p>
@@ -471,7 +471,7 @@ export default function NewRequest() {
                     <button
                       type="button"
                       onClick={handleCopy}
-                      className="bg-ink px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson"
+                      className="rounded-md bg-ink px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson"
                     >
                       {copied ? 'COPIED ✓' : 'COPY REQUEST'}
                     </button>
@@ -479,7 +479,7 @@ export default function NewRequest() {
                       href="https://www.foia.gov/agency-search.html"
                       target="_blank"
                       rel="noreferrer"
-                      className="border border-ink/25 px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-ink no-underline transition-colors hover:border-crimson hover:text-crimson"
+                      className="rounded-md border border-ink/25 px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-ink no-underline transition-colors hover:border-crimson hover:text-crimson"
                     >
                       FILE AT FOIA.GOV ↗
                     </a>

@@ -27,6 +27,7 @@ export default function RequestDetail() {
   const [fulfilling, setFulfilling] = useState(false)
   const [actionError, setActionError] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [showThread, setShowThread] = useState(false)
   const fileInputRef = useRef(null)
 
   const handleCopy = async () => {
@@ -46,6 +47,9 @@ export default function RequestDetail() {
       setRequest(data.request)
       setMessages(data.messages || [])
       setDocuments(data.documents || [])
+      // Answer-only chats (no drafted request yet) have nothing but the
+      // conversation, so show it expanded; drafted requests stay collapsed.
+      setShowThread(!data.request?.final_text)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -120,7 +124,7 @@ export default function RequestDetail() {
       </div>
 
       {request.final_text && (
-        <div className="mb-6 border border-ink/15 bg-white p-5">
+        <div className="mb-6 rounded-lg border border-ink/15 bg-white p-5">
           <CardLabel>Request Text</CardLabel>
           <pre className="whitespace-pre-wrap font-mono text-sm text-ink/80">
             {request.final_text}
@@ -130,7 +134,7 @@ export default function RequestDetail() {
               <button
                 type="button"
                 onClick={handleCopy}
-                className="bg-ink px-4 py-2 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson"
+                className="rounded-md bg-ink px-4 py-2 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson"
               >
                 {copied ? 'COPIED ✓' : 'COPY REQUEST'}
               </button>
@@ -138,7 +142,7 @@ export default function RequestDetail() {
                 href="https://www.foia.gov/agency-search.html"
                 target="_blank"
                 rel="noreferrer"
-                className="border border-ink/25 px-4 py-2 font-mono text-xs font-medium tracking-wider text-ink no-underline transition-colors hover:border-crimson hover:text-crimson"
+                className="rounded-md border border-ink/25 px-4 py-2 font-mono text-xs font-medium tracking-wider text-ink no-underline transition-colors hover:border-crimson hover:text-crimson"
               >
                 FILE AT FOIA.GOV ↗
               </a>
@@ -147,29 +151,41 @@ export default function RequestDetail() {
         </div>
       )}
 
-      <div className="mb-6 border border-ink/15 bg-white p-5">
-        <CardLabel>Message Thread</CardLabel>
-        <div className="space-y-2">
-          {messages.length === 0 && (
-            <p className="text-sm text-graphite/70">No messages.</p>
+      {!isEmployee && messages.length > 0 && (
+        <div className="mb-6 rounded-lg border border-ink/15 bg-white p-5">
+          <button
+            type="button"
+            onClick={() => setShowThread((s) => !s)}
+            className="flex w-full items-center justify-between"
+          >
+            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.25em] text-graphite">
+              How this request was scoped
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-graphite/70">
+              {showThread ? 'Hide' : `Show conversation (${messages.length})`}
+            </span>
+          </button>
+          {showThread && (
+            <div className="mt-4 space-y-2">
+              {messages.map((m, i) => {
+                const r = m.role || m.sender || 'assistant'
+                const isUser = r === 'user' || r === 'citizen'
+                return (
+                  <div key={m.id ?? i} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
+                        isUser ? 'border border-ink/15 bg-ink/[0.06] text-ink' : 'border border-ink/15 bg-paper text-ink/80'
+                      }`}
+                    >
+                      {m.content}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           )}
-          {messages.map((m, i) => {
-            const r = m.role || m.sender || 'assistant'
-            const isUser = r === 'user' || r === 'citizen'
-            return (
-              <div key={m.id ?? i} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[85%] px-3 py-2 text-sm ${
-                    isUser ? 'border border-ink/15 bg-ink/[0.06] text-ink' : 'border border-ink/15 bg-paper text-ink/80'
-                  }`}
-                >
-                  {m.content}
-                </div>
-              </div>
-            )
-          })}
         </div>
-      </div>
+      )}
 
       {/* Citizen view */}
       {!isEmployee && (
@@ -207,7 +223,7 @@ export default function RequestDetail() {
       {/* Employee view */}
       {isEmployee && (
         <div className="space-y-4">
-          <div className="border border-ink/15 bg-white p-5">
+          <div className="rounded-lg border border-ink/15 bg-white p-5">
             <CardLabel>Existing Documents</CardLabel>
             {documents.length === 0 ? (
               <p className="text-sm text-graphite">No documents attached yet.</p>
@@ -226,7 +242,7 @@ export default function RequestDetail() {
           </div>
 
           {!isFulfilled && (
-            <div className="border border-ink/15 bg-white p-5">
+            <div className="rounded-lg border border-ink/15 bg-white p-5">
               <CardLabel>Attach Responsive Document</CardLabel>
               <form onSubmit={handleUpload} className="flex flex-wrap items-center gap-3">
                 <input
