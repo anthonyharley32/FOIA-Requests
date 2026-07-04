@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowRight, FileText, PenLine, Send } from 'lucide-react'
+import { ArrowRight, FileText, PenLine, Search, Send } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 /* ---------------------------------------------------------------- */
@@ -144,7 +144,7 @@ function Header({ session }) {
     <header className="border-b border-ink/10">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link to="/" className="flex items-baseline gap-3">
-          <span className="font-display text-2xl tracking-tight text-ink">Unredacted</span>
+          <span className="font-display text-3xl tracking-tight text-ink">Unredacted</span>
           <span className="hidden font-mono text-[10px] tracking-[0.2em] text-graphite sm:inline">
             FOIA REQUEST STUDIO
           </span>
@@ -279,8 +279,9 @@ function Hero({ session }) {
             transition={{ delay: 0.5, duration: 0.6, ease: EASE }}
             className="mt-7 max-w-xl text-lg leading-relaxed text-graphite"
           >
-            Unredacted turns a plain-English question into a precise, well-scoped FOIA
-            request — drafted in minutes, grounded in DOJ guidance, ready to file.
+            Ask a plain-English question. Unredacted first checks whether the answer is
+            already in the public record — with citations — and if it isn’t, turns your
+            question into a precise, ready-to-file FOIA request.
           </motion.p>
 
           <motion.div
@@ -312,10 +313,10 @@ function Hero({ session }) {
 }
 
 const STATS = [
-  { value: '1.7M+', label: 'FOIA requests filed with federal agencies every year' },
-  { value: '200K+', label: 'requests sitting in agency backlogs right now' },
-  { value: '100+ days', label: 'typical wait for complex requests to be processed' },
-  { value: 'Cause № 1', label: 'of delay: vague, overbroad, poorly scoped requests' },
+  { value: '1.2M', label: 'FOIA requests filed with federal agencies in 2023 — the first year ever above one million' },
+  { value: '20 days', label: 'the response deadline the law sets for every request' },
+  { value: '267 days', label: 'the real average wait for a complex request to be processed' },
+  { value: '2×', label: 'how much the wait for even simple requests has grown in a decade' },
 ]
 
 function Stats() {
@@ -348,20 +349,20 @@ const STEPS = [
   {
     icon: PenLine,
     num: '01',
-    title: 'Describe',
+    title: 'Ask',
     body: 'Tell us what you’re trying to find out, in plain English. No legal training required — a sentence is enough to start.',
   },
   {
-    icon: FileText,
+    icon: Search,
     num: '02',
-    title: 'Draft',
-    body: 'Our agent drafts a precise, well-scoped request grounded in DOJ FOIA guidance and the patterns of successful filings.',
+    title: 'Search public records',
+    body: 'We check already-released government records first and answer with citations when the information is public — so you don’t file a request you don’t need.',
   },
   {
     icon: Send,
     num: '03',
-    title: 'File',
-    body: 'Review, refine, and submit through the official agency portal. You keep full control of every word that goes out.',
+    title: 'Draft & file',
+    body: 'If it isn’t public, our agent drafts a precise, well-scoped FOIA request. Review, refine, and file it through the official agency portal.',
   },
 ]
 
@@ -372,7 +373,7 @@ function Process() {
         <Rise>
           <SectionLabel>SECTION 02 — THE PROCESS</SectionLabel>
           <h2 className="mt-4 max-w-2xl font-display text-4xl leading-tight text-ink sm:text-5xl">
-            From rough question to filed request in three moves.
+            From a plain-English question to an answer — or a request worth filing.
           </h2>
         </Rise>
 

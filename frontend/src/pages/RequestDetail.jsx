@@ -26,7 +26,18 @@ export default function RequestDetail() {
   const [uploading, setUploading] = useState(false)
   const [fulfilling, setFulfilling] = useState(false)
   const [actionError, setActionError] = useState(null)
+  const [copied, setCopied] = useState(false)
   const fileInputRef = useRef(null)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(request?.final_text || '')
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      /* ignore — user can select and copy manually */
+    }
+  }
 
   const load = useCallback(async () => {
     setError(null)
@@ -114,6 +125,25 @@ export default function RequestDetail() {
           <pre className="whitespace-pre-wrap font-mono text-sm text-ink/80">
             {request.final_text}
           </pre>
+          {!isEmployee && (
+            <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-ink/10 pt-4">
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="bg-ink px-4 py-2 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson"
+              >
+                {copied ? 'COPIED ✓' : 'COPY REQUEST'}
+              </button>
+              <a
+                href="https://www.foia.gov/"
+                target="_blank"
+                rel="noreferrer"
+                className="border border-ink/25 px-4 py-2 font-mono text-xs font-medium tracking-wider text-ink no-underline transition-colors hover:border-crimson hover:text-crimson"
+              >
+                FILE AT FOIA.GOV ↗
+              </a>
+            </div>
+          )}
         </div>
       )}
 

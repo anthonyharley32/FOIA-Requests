@@ -124,6 +124,7 @@ export default function NewRequest() {
   const [started, setStarted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [copied, setCopied] = useState(false)
   const [error, setError] = useState(null)
 
   const textareaRef = useRef(null)
@@ -214,6 +215,16 @@ export default function NewRequest() {
   const handleExampleClick = (prompt) => {
     if (loading) return
     handleStart(prompt)
+  }
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(finalText)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setError('Could not copy to clipboard — select the text and copy manually.')
+    }
   }
 
   const handleSubmitRequest = async () => {
@@ -355,7 +366,7 @@ export default function NewRequest() {
                 </motion.div>
               )}
 
-              {suggestedAgency && (
+              {suggestedAgency && !ready && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -386,29 +397,62 @@ export default function NewRequest() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={springs.standard}
-                  className="space-y-3 border border-ink/15 bg-white p-5"
+                  className="space-y-4 border border-ink/15 bg-white p-5"
                 >
-                  <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.25em] text-graphite">
-                    Review & Refine Your Request
-                  </h2>
-                  <p className="text-xs text-graphite">
-                    This is the structured FOIA request text that will be submitted. Edit it
-                    if needed before submitting.
-                  </p>
+                  <div>
+                    <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.25em] text-graphite">
+                      Your FOIA Request Is Ready
+                    </h2>
+                    <p className="mt-2 text-xs text-graphite">
+                      Edit the text below if needed, then file it yourself at FOIA.gov — or
+                      submit it through Unredacted to track it here.
+                    </p>
+                  </div>
+
                   <textarea
-                    rows={10}
+                    rows={12}
                     value={finalText}
                     onChange={(e) => setFinalText(e.target.value)}
                     className="w-full border border-ink/25 bg-paper/50 px-3 py-2 font-mono text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
                   />
-                  <button
-                    type="button"
-                    onClick={handleSubmitRequest}
-                    disabled={submitting}
-                    className="bg-ink px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson disabled:opacity-50"
-                  >
-                    {submitting ? 'SUBMITTING...' : 'SUBMIT REQUEST'}
-                  </button>
+
+                  {suggestedAgency && (
+                    <div className="border border-ink/15 bg-paper/60 px-4 py-3">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-graphite">
+                        Where to file
+                      </p>
+                      <p className="mt-1 text-sm text-ink">{suggestedAgency}</p>
+                      <p className="mt-1 text-xs text-graphite">
+                        Most federal requests can be filed through the national portal at FOIA.gov.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-3 border-t border-ink/10 pt-4">
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="bg-ink px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson"
+                    >
+                      {copied ? 'COPIED ✓' : 'COPY REQUEST'}
+                    </button>
+                    <a
+                      href="https://www.foia.gov/"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="border border-ink/25 px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-ink no-underline transition-colors hover:border-crimson hover:text-crimson"
+                    >
+                      FILE AT FOIA.GOV ↗
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleSubmitRequest}
+                      disabled={submitting}
+                      className="text-xs font-medium text-graphite/70 underline underline-offset-4 hover:text-ink disabled:opacity-50"
+                    >
+                      {submitting ? 'Submitting…' : 'Or submit through Unredacted →'}
+                    </button>
+                  </div>
                 </motion.div>
               )}
 
