@@ -5,8 +5,11 @@ create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text not null,
   role text not null check (role in ('citizen', 'employee')) default 'citizen',
+  requester_profile jsonb,
   created_at timestamptz not null default now()
 );
+-- For existing databases created before this column was added:
+alter table profiles add column if not exists requester_profile jsonb;
 
 create table if not exists requests (
   id uuid primary key default gen_random_uuid(),

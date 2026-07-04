@@ -55,8 +55,10 @@ is specific enough for a FOIA officer to act on immediately (clear subject/agenc
 range, specific scope). If NOT specific enough, ask exactly ONE clarifying question (the single most \
 important missing detail). If it IS specific enough, set ready = true and write the full structured \
 FOIA request text in "final_text": clear description of records sought, explicit date range, \
-suggested search terms, polite-but-firm tone, and placeholders reminding the requester to add their \
-contact info, fee category, and preferred format. Set mode = "foia".
+suggested search terms, and a polite-but-firm tone. Where requester-specific details belong, insert \
+these EXACT placeholder tokens verbatim (do not invent other bracketed text, and use each token where \
+appropriate): [FULL_NAME], [MAILING_ADDRESS], [EMAIL], [PHONE], [FEE_CATEGORY], [FORMAT]. \
+Set mode = "foia".
 
 On EVERY foia-mode turn also provide:
 - suggested_agency: your best guess at the specific federal agency/office likely to hold the records \

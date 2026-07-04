@@ -11,7 +11,7 @@ from app import db
 from app.ai import get_ai_response
 from app.auth import get_current_user, require_citizen, require_employee
 from app.config import CORS_ORIGIN, DOCUMENTS_BUCKET, SUPABASE_URL
-from app.schemas import IntentCreate, ReplyCreate, SubmitCreate
+from app.schemas import IntentCreate, ProfileUpdate, ReplyCreate, SubmitCreate
 from app.supabase_client import get_service_client
 
 app = FastAPI(title="Unredacted API")
@@ -33,6 +33,14 @@ def health():
 @app.get("/me")
 def me(user: dict = Depends(get_current_user)):
     return user
+
+
+@app.put("/me/profile")
+def update_my_profile(body: ProfileUpdate, user: dict = Depends(get_current_user)):
+    get_service_client().table("profiles").update(
+        {"requester_profile": body.requester_profile}
+    ).eq("id", user["id"]).execute()
+    return {"requester_profile": body.requester_profile}
 
 
 @app.post("/requests")

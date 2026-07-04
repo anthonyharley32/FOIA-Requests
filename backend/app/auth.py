@@ -32,7 +32,7 @@ def get_current_user(
         profile_result = (
             get_service_client()
             .table("profiles")
-            .select("id, email, role")
+            .select("*")
             .eq("id", user.id)
             .execute()
         )
@@ -44,7 +44,12 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="No profile found for user")
 
     profile = rows[0]
-    return {"id": profile["id"], "email": profile["email"], "role": profile["role"]}
+    return {
+        "id": profile["id"],
+        "email": profile["email"],
+        "role": profile["role"],
+        "requester_profile": profile.get("requester_profile") or {},
+    }
 
 
 def require_citizen(user: dict = Depends(get_current_user)) -> dict:

@@ -24,6 +24,38 @@ function loadSaved() {
   }
 }
 
+// Requester-profile autofill: the AI emits these exact tokens in the drafted
+// request; we substitute the citizen's saved details in their place.
+const TOKEN_MAP = {
+  '[FULL_NAME]': 'full_name',
+  '[MAILING_ADDRESS]': 'address',
+  '[EMAIL]': 'email',
+  '[PHONE]': 'phone',
+  '[FEE_CATEGORY]': 'requester_category',
+  '[FORMAT]': 'format',
+}
+function fillTokens(text, p) {
+  if (!text || !p) return text
+  let out = text
+  for (const [token, key] of Object.entries(TOKEN_MAP)) {
+    if (p[key]) out = out.split(token).join(p[key])
+  }
+  return out
+}
+const PROFILE_FIELDS = [
+  { key: 'full_name', label: 'Full name', type: 'text' },
+  { key: 'email', label: 'Email', type: 'email' },
+  { key: 'phone', label: 'Phone', type: 'text' },
+  { key: 'address', label: 'Mailing address', type: 'text' },
+]
+const REQUESTER_CATEGORIES = [
+  'Individual / other requester',
+  'Representative of the news media',
+  'Educational / noncommercial scientific institution',
+  'Commercial-use requester',
+]
+const FORMATS = ['Electronic / PDF', 'Paper copies']
+
 // Renders assistant text, turning [n] markers into small clickable citation
 // badges that link to the matching source card / document URL.
 function CitationText({ text, citations }) {
@@ -118,8 +150,17 @@ function CitationCards({ citations }) {
 }
 
 export default function NewRequest() {
-  const { fetchApi } = useAuth()
+  const { fetchApi, profile } = useAuth()
   const navigate = useNavigate()
+
+  const [profileForm, setProfileForm] = useState({})
+  const [profileSaved, setProfileSaved] = useState(false)
+
+  useEffect(() => {
+    if (profile?.requester_profile && Object.keys(profile.requester_profile).length) {
+      setProfileForm(profile.requester_profile)
+    }
+  }, [profile])
 
   const [savedOnce] = useState(loadSaved)
 
@@ -267,6 +308,29 @@ export default function NewRequest() {
       setError('Could not copy to clipboard — select the text and copy manually.')
     }
   }
+
+  const handleSaveProfile = async () => {
+    setError(null)
+    try {
+      await fetchApi('/me/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ requester_profile: profileForm }),
+      })
+      setProfileSaved(true)
+      setFinalText((t) => fillTokens(t, profileForm))
+      setTimeout(() => setProfileSaved(false), 2500)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  // Auto-fill saved details into the drafted request when it becomes ready.
+  useEffect(() => {
+    if (ready && Object.keys(profileForm).length) {
+      setFinalText((t) => fillTokens(t, profileForm))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready])
 
   const handleSubmitRequest = async () => {
     setError(null)
@@ -446,6 +510,57 @@ export default function NewRequest() {
                       Edit the text below if needed, then file it yourself at FOIA.gov — or
                       submit it through Unredacted to track it here.
                     </p>
+                  </div>
+
+                  <div className="rounded-md border border-ink/15 bg-paper/60 p-4">
+                    <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-graphite">
+                      Your filing details — saved to your account & auto-filled into the request
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {PROFILE_FIELDS.map((f) => (
+                        <input
+                          key={f.key}
+                          type={f.type}
+                          placeholder={f.label}
+                          value={profileForm[f.key] || ''}
+                          onChange={(e) =>
+                            setProfileForm((p) => ({ ...p, [f.key]: e.target.value }))
+                          }
+                          className="rounded-md border border-ink/25 bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                        />
+                      ))}
+                      <select
+                        value={profileForm.requester_category || ''}
+                        onChange={(e) =>
+                          setProfileForm((p) => ({ ...p, requester_category: e.target.value }))
+                        }
+                        className="rounded-md border border-ink/25 bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                      >
+                        <option value="">Requester category…</option>
+                        {REQUESTER_CATEGORIES.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={profileForm.format || ''}
+                        onChange={(e) =>
+                          setProfileForm((p) => ({ ...p, format: e.target.value }))
+                        }
+                        className="rounded-md border border-ink/25 bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                      >
+                        <option value="">Preferred format…</option>
+                        {FORMATS.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSaveProfile}
+                      className="mt-3 rounded-md bg-ink px-4 py-2 font-mono text-xs font-medium tracking-wider text-paper transition-colors hover:bg-crimson"
+                    >
+                      {profileSaved ? 'SAVED ✓ — FILLED INTO REQUEST' : 'SAVE & AUTOFILL'}
+                    </button>
                   </div>
 
                   <textarea

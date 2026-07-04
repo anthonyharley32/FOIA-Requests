@@ -12,3 +12,7 @@ class ReplyCreate(BaseModel):
 
 class SubmitCreate(BaseModel):
     final_text: str | None = None
+
+
+class ProfileUpdate(BaseModel):
+    requester_profile: dict
